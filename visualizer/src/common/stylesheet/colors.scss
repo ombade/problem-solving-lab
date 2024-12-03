@@ -1,0 +1,25 @@
+$theme-dark: #e0e0e0;
+$theme-normal: #eeeeee;
+$theme-light: #fafafa;
+$color-font: #616161;
+$color-shadow: rgba(#000000, 0.2);
+$color-overlay: rgba(#ffffff, 0.1);
+$color-alert: #f3bd58;
+$color-selected: #64b5f6;
+$color-patched: #e57373;
+$color-highlight: #29d;
+$color-active: #00e676;
+
+:export {
+  themeDark: $theme-dark;
+  themeNormal: $theme-normal;
+  themeLight: $theme-light;
+  colorFont: $color-font;
+  colorShadow: $color-shadow;
+  colorOverlay: $color-overlay;
+  colorAlert: $color-alert;
+  colorSelected: $color-selected;
+  colorPatched: $color-patched;
+  colorHighlight: $color-highlight;
+  colorActive: $color-active;
+}

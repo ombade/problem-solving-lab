@@ -1,0 +1,13 @@
+# WebStorm settings
+/.idea
+
+# npm
+/node_modules
+/npm-debug.log
+
+# macOS
+.DS_Store
+
+
+
+
