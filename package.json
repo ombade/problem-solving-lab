@@ -8,6 +8,7 @@
     "concurrently": "^8.2.2"
   },
   "scripts": {
+    "vercel-build": "yarn install && yarn build",
     "start": "concurrently \"npm run start-server\" \"npm run start-visualizer\"",
     "start-server": "cd server && npm start",
     "start-visualizer": "cd visualizer && npm start"
