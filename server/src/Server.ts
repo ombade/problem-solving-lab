@@ -12,6 +12,7 @@ import * as Tracers from 'tracers';
 import { errorHandlerMiddleware, frontendMiddleware, redirectMiddleware } from 'middlewares';
 import { execute, pull } from 'utils/misc';
 import { frontendBuildDir, frontendBuiltDir, frontendDir, rootDir } from 'config/paths';
+import cors from 'cors';
 
 const Webhook = require('express-github-webhook');
 
@@ -22,6 +23,13 @@ export default class Server {
   private readonly webhook = webhookOptions && Webhook(webhookOptions);
 
   constructor() {
+    // Add CORS middleware before other routes
+    this.app.use(cors({
+      origin: ['http://localhost:3000', 'https://problem-solving-lab.vercel.app'],  // Allow frontend URLs
+      methods: ['GET', 'POST', 'PUT', 'DELETE'],  // Allowed methods
+      credentials: true,  // Allow cookies/credentials to be sent
+    }));
+
     this.app
       .use(compression())
       .use(morgan(__PROD__ ? 'tiny' : 'dev'))
@@ -115,3 +123,4 @@ export default class Server {
     }
   }
 }
+
