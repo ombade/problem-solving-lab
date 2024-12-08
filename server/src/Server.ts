@@ -4,6 +4,7 @@ import bodyParser from 'body-parser';
 import * as Controllers from 'controllers';
 import { NotFound } from 'ts-httpexceptions';
 import compression from 'compression';
+import cors from 'cors'; // Add the cors package
 import { __PROD__, credentials, httpPort, httpsPort, webhookOptions } from 'config/environments';
 import http from 'http';
 import https from 'https';
@@ -12,7 +13,6 @@ import * as Tracers from 'tracers';
 import { errorHandlerMiddleware, frontendMiddleware, redirectMiddleware } from 'middlewares';
 import { execute, pull } from 'utils/misc';
 import { frontendBuildDir, frontendBuiltDir, frontendDir, rootDir } from 'config/paths';
-import cors from 'cors';
 
 const Webhook = require('express-github-webhook');
 
@@ -23,23 +23,34 @@ export default class Server {
   private readonly webhook = webhookOptions && Webhook(webhookOptions);
 
   constructor() {
-    // Add CORS middleware before other routes
-    this.app.use(cors({
-      origin: ['http://localhost:3000', 'https://problem-solving-lab.vercel.app'],  // Allow frontend URLs
-      methods: ['GET', 'POST', 'PUT', 'DELETE'],  // Allowed methods
-      credentials: true,  // Allow cookies/credentials to be sent
-    }));
-
     this.app
       .use(compression())
       .use(morgan(__PROD__ ? 'tiny' : 'dev'))
       .use(redirectMiddleware())
       .use(bodyParser.json())
       .use(bodyParser.urlencoded({ extended: true }))
+      .use(
+        cors({ // Enable CORS
+          origin: '*', // Adjust this to specify allowed origins
+          methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+          allowedHeaders: [
+            'X-CSRF-Token',
+            'X-Requested-With',
+            'Accept',
+            'Accept-Version',
+            'Content-Length',
+            'Content-MD5',
+            'Content-Type',
+            'Date',
+            'X-Api-Version',
+          ],
+          credentials: true,
+        })
+      )
       .use('/api', this.getApiRouter())
       .use(frontendMiddleware(this));
 
-    // Add a base route to confirm the server is working
+    // Base route to confirm the server is working
     this.app.get('/', (req: Request, res: Response) => {
       res.send('Server is working properly');
     });
@@ -99,12 +110,13 @@ export default class Server {
 
   async updateFrontend(commit?: string) {
     await pull(frontendDir, 'algorithm-visualizer', commit);
-    await execute([
-      'npm install',
-      'npm run build',
-      `rm -rf ${frontendBuiltDir}`,
-      `mv ${frontendBuildDir} ${frontendBuiltDir}`,
-    ].join(' && '), {
+    await execute(
+      [
+        'npm install',
+        'npm run build',
+        `rm -rf ${frontendBuiltDir}`,
+        `mv ${frontendBuildDir} ${frontendBuiltDir}`,
+      ].join(' && '), {
       cwd: frontendDir,
       stdout: process.stdout,
       stderr: process.stderr,
@@ -123,4 +135,3 @@ export default class Server {
     }
   }
 }
-
